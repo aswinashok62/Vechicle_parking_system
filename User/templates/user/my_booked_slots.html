@@ -1,0 +1,51 @@
+{% extends 'user/shared/base.html' %}
+
+{% load static %}
+{% block name %}
+{{uname}}
+{% endblock name %}
+
+{% block content %}
+<h1 style="color: #01d28e;">My Booked Slots </h1>
+<br>
+<br>
+<br>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Slot Number</th>
+            <th>Booked In</th>
+            <th>Vehicle Type</th>
+            <th>Booked At</th>
+            <th>Start At</th>
+            <th>End At</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if bookings %}
+        {% for booking in bookings %}
+        <tr>
+            <td>{{ booking.parking_slot__slot_number }}</td>
+            <td>{{ booking.parking_slot__mall__username}}</td>
+            <td>{{ booking.parking_slot__vehicle_type }}</td>
+            <td>{{ booking.created_at }}</td>
+            <td>{{ booking.start_time }}</td>
+            <td>{{ booking.end_time }}</td>
+           
+            <td>{{ booking.status }}</td>
+ 
+
+
+            <!-- <td>{{ booking.end_time|date:"H:i:s" }}</td> -->
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="4">No bookings for today.</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+</div>
+{% endblock content %}

@@ -1,0 +1,97 @@
+{% extends 'user/shared/base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+
+      <div class="container">
+        <div class="section-title">
+
+          <!-- {% if not payment %} -->
+          <div id="app">
+            <div class="col-6 pt-5 mx-auto">
+              <div class="text-center">
+                <h1 style="margin-top: 100px; text-align: center; color: green;">RECHARGE DETAILS</h1>
+                <form class="m" method="post">
+                  {% csrf_token %}
+                  <div class="form-group pt-4">
+                    <label for="exampleInputEmail1">User name</label>
+                    <input name="name" type="text" style="color:black" class="form-control" disabled id="exampleInputEmail1" value="{{ name|escape }}">
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleInputPassword1"> Email</label>
+                    <input type="email" class="form-control" style="color:black" name="email"  disabled id="exampleInputPassword1" value="{{ email|escape }}">
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleInputPassword1">Enter Your Amount</label>
+                    <input type="number" class="form-control" name="amount" id="exampleInputPassword1" value="{{ price|escape }}">
+                  </div>
+                  <button class="btn btn-success btn-block" type="submit">Recharge</button>
+                </form>
+              </div>
+            </div>
+          </div>
+          <!-- {% endif %} -->
+
+          <!-- {% if payment %} -->
+          <h1 style="color: #01d28e;">Make Payment</h1>
+          <div class="container mx-auto text-center mt-4">
+            <form action="{% url 'success' user %}" method="post">
+              {% csrf_token %}
+              <script src="https://checkout.razorpay.com/v1/checkout.js"
+                data-key="rzp_test_ifqXZb84qSL1CP"
+                data-amount="{{ payment.amount }}*100"
+                data-currency="INR"
+                data-order_id="{{ payment.id }}"
+                data-buttontext="Pay with Razorpay"
+                data-name="Parking Slot"
+                data-description="Thanks for Payment."
+                data-image="https://example.com/your_logo.jpg"
+                data-prefill.name="{{ name|escape }}"
+                data-prefill.email="{{ email|escape }}"
+                data-prefill.contact="{{ contact|escape }}"
+                data-theme.color="#F37254">
+              </script>
+              <input type="hidden" name="hidden" value="custom_value">
+            </form>
+          </div>
+          <!-- {% endif %} -->
+
+        </div>
+      </div>
+  
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+  var app = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#app',
+    data: {
+      message: 'Hello Vue!',
+      name: null,
+      amount: null
+    },
+    methods: {
+      greet: function(name) {
+        console.log('Hello from ' + name + '!')
+      },
+      get: function() {
+        console.log(this.name, this.amount)
+      }
+    },
+    watch: {
+      amount() {
+        console.log(this.amount)
+      }
+    }
+  });
+</script>
+
+<style>
+  body {
+    background:rgb(31, 95, 222);
+  }
+</style>
+
+{% endblock %}

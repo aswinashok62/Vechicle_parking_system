@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>OpenStreetMap Integration</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        // Initialize the map (set default view in case geolocation fails)
+        var map = L.map('map').setView([9.967, 76.290], 8); // Default location (kerala,kochi)
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Variable to keep track of the currently selected marker
+        var currentMarker = null;
+
+        /// function to get place name
+        function getPlaceName(lat, lon, callback) {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.address) {
+                        // Extract relevant place name (e.g., city, town, village, or suburb)
+                        const { town, village, suburb } = data.address;
+                        const placeName = town || village || suburb || 'Unknown Place';
+                        callback(placeName);
+                    } else {
+                        callback('Location name not found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error with reverse geocoding:', error);
+                    callback('Error retrieving location name');
+                });
+        }
+
+
+        // function to get the district name
+        function getDistrictName(lat, lon, callback) {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.address) {
+                        // Extract district name (county or state_district)
+                        const { state_district } = data.address;
+                        const districtName = state_district || 'District not found';
+                        callback(districtName);
+                    } else {
+                        callback('District not found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error with reverse geocoding:', error);
+                    callback('Error retrieving district name');
+                });
+        }
+
+        // Try to get the current location using geolocation API
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                var latitude = position.coords.latitude;
+                var longitude = position.coords.longitude;
+
+                // Set the map view to the current location
+                map.setView([latitude, longitude], 13);
+
+                // Add a marker for the current location
+                getPlaceName(latitude, longitude, function (placeName) {
+                    currentMarker = L.marker([latitude, longitude]).addTo(map)
+                        .bindPopup(placeName)
+                        .openPopup();
+                });
+            }, function (error) {
+                console.error("Geolocation error: " + error.message);
+            });
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+        }
+
+        //getallmallsbydistrict
+        function getMallsByDistrict(district) {
+            const malls = {
+                "Thiruvananthapuram": [
+                    { id: 1, name: "Mall of Travancore", lat: 8.515278, lon: 76.898611 },
+                    { id: 2, name: "LuLu Mall", lat: 8.51528, lon: 76.89861 }
+                ],
+                "Ernakulam": [
+                    { id: 3, name: "LuLu Mall", lat: 10.026617, lon: 76.3087 },
+                    { id: 4, name: "Oberon Mall", lat: 10.008667, lon: 76.307333 },
+                    { id: 5, name: "Forum Mall", lat: 9.939664, lon: 76.310944 },
+                    { id: 6, name: "Centre Square Mall", lat: 9.9816, lon: 76.2825 }
+                ],
+                "Kozhikode": [
+                    { name: "Forum Mall Kozhikode", lat: 11.2556, lon: 75.7684 },
+                    { name: "City Centre Mall", lat: 11.2568, lon: 75.7772 }
+                ],
+                "Kottayam": [
+                    { name: "Mall of Joy", lat: 9.5915, lon: 76.5222 },
+                    { name: "LuLu Mall", lat: 9.5915, lon: 76.5222 }
+                ],
+                "Pathanamthitta": [
+                    { name: "Mall Grande", lat: 9.2644, lon: 76.7872 }
+                ],
+                "Alappuzha": [
+                    { name: "Reliance Mall Alleppey", lat: 9.4981, lon: 76.3388 }
+                ],
+                "Kollam": [
+                    { name: "RP Mall Kollam", lat: 8.885347, lon: 76.590759 },
+                    { name: "H & J Mall Karunagappally", lat: 9.058000, lon: 76.519400 },
+                    { name: "Bishop Jerome Commercial Complex", lat: 8.885347, lon: 76.590759 },
+                    { name: "Mall of Joy", lat: 8.885347, lon: 76.590759 },
+                    { name: "D Mall", lat: 8.885347, lon: 76.590759 }
+                ],
+                "Thrissur": [
+                    { name: "Sobha City Mall", lat: 10.517096, lon: 76.212578 },
+                    { name: "Selex Mall", lat: 10.527642, lon: 76.214434 },
+                    { name: "HiLITE Mall Thrissur", lat: 10.527642, lon: 76.214434 }
+                ],
+                "Palakkad": [
+                    { name: "LuLu Mall", lat: 10.786730, lon: 76.654793 },
+                    { name: "Jobys Mall", lat: 10.786730, lon: 76.654793 }
+                ],
+                "Malappuram": [
+                    { name: "Forum Center: Shopping Mall", lat: 11.042900, lon: 76.071100 },
+                    { name: "VAVAS Mall", lat: 11.042900, lon: 76.071100 }
+                ],
+                "Wayanad": [
+                    { name: "Mint Mall", lat: 11.685400, lon: 76.132000 },
+                    { name: "Gokulam Galleria", lat: 11.685400, lon: 76.132000 }
+                ],
+                "Kannur": [
+                    { name: "Capitol Mall", lat: 11.874500, lon: 75.370400 },
+                    { name: "Kannur Central, Mall of Emad", lat: 11.874500, lon: 75.370400 },
+                    { name: "City Centre, Kannur", lat: 11.874500, lon: 75.370400 }
+                ],
+                "Kasaragod": [
+                    { name: "Square Nine Mall", lat: 12.498400, lon: 74.989600 }
+                ]
+            };
+
+            // Return malls for the given district, or an empty array if no malls are found
+            return malls[district] || [];
+        }
+        
+        let mallMarkers = [];
+        var mallId = 0;
+        // Add click event to select a location on the map
+        map.on('click', function (e) {
+            let lat = e.latlng.lat;
+            let lon = e.latlng.lng;
+
+            // Remove existing marker if it exists
+            if (currentMarker) {
+                map.removeLayer(currentMarker);
+            }
+
+            // Get place name for the clicked location
+            getPlaceName(lat, lon, function (placeName) {
+                // Add marker at clicked location
+                currentMarker = L.marker([lat, lon]).addTo(map)
+                    .bindPopup(placeName)
+                    .openPopup();
+            });
+
+            // Get district name for the clicked location
+            getDistrictName(lat, lon, function (districtName) {
+                console.log('District:', districtName);
+
+                // Remove existing mall markers
+                mallMarkers.forEach(marker => map.removeLayer(marker));
+                mallMarkers = [];
+
+                // Get malls for the selected district using the function
+                const malls = getMallsByDistrict(districtName);
+                if (malls.length > 0) {
+                    console.log(`Adding malls for: ${districtName}`);
+                    malls.forEach(mall => {
+                        const marker = L.marker([mall.lat, mall.lon]).addTo(map)
+                            .bindPopup(`<b>${mall.name}</b>`)
+                            .on('click', function (e) {
+                                mallId = mall.id;
+                                console.log(mallId);
+                            });
+
+                        mallMarkers.push(marker);
+                    });
+                } else {
+                    console.log("No malls found for this district.");
+                }
+
+            });
+        });
+
+
+
+    </script>
+</body>
+
+</html>

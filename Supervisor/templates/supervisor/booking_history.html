@@ -1,0 +1,94 @@
+{% extends 'supervisor/shared/base.html' %}
+
+{% load static %}
+{% block name %}
+{{uname}}
+{% endblock name %}
+
+{% block content %}
+
+
+
+<h1 style="color: #01d28e;">Booking  History for {{ user.username }}'s Mall on {{ today }}</h1>
+<br>
+<br>
+
+
+<div class="container">
+    
+
+    <form action="" method="post" style="color: black;">
+{% csrf_token %}
+        <div class="row">
+            <div class="col-lg-6">
+                <Label>Choose Date</Label>
+                <input type="date" class="form-control" name="start_time" id="start_time" required>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-lg-6">
+             
+                <input type="submit" class=" btn btn-primary" value="Search">
+            </div>
+
+
+        </div>
+    </form>
+
+
+<br>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Slot Number</th>
+            <th>Booked By</th>
+            <th>Vehicle Type</th>
+            <th>Booked At</th>
+            <th>Start At</th>
+            <th>End At</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if bookings %}
+        {% for booking in bookings %}
+        <tr>
+            <td>{{ booking.parking_slot__slot_number }}</td>
+            <td>{{ booking.user__username }}</td>
+            <td>{{ booking.parking_slot__vehicle_type }}</td>
+            <td>{{ booking.created_at }}</td>
+            <td>{{ booking.start_time }}</td>
+            <td>{{ booking.end_time }}</td>
+            <td>{{ booking.status }}</td>
+           
+            <!-- <td>{{ booking.is_start_time_over }}</td> -->
+       
+            <!-- <td>{{ booking.current_time }}</td> -->
+            <!-- <td>
+                {% if booking.status == 'reserved' and  booking.start_time >  booking.current_time   %} 
+                    <a href="{% url 'NotOccupied' booking.id %}" class="btn btn-warning btn-sm">Mark as Not Occupied</a>
+                {% elif booking.status == 'reserved' %}
+                <a href="{% url 'NotOccupied' booking.id %}" class="btn btn-warning btn-sm">Mark as Not Occupied</a>
+                    <a href="{% url 'Occupied' booking.id %}" class="btn btn-warning btn-sm">Mark as Occupied</a>
+
+                 {% elif booking.status == 'Occupied' %}
+                    <a href="{% url 'Payment' booking.id %}" class="btn btn-success btn-sm">Payment</a>
+                {% elif booking.status == 'Paid' %}
+                    <a class="btn btn-info btn-sm">Completed</a>
+                {% endif %} 
+            </td> -->
+
+
+            <!-- <td>{{ booking.end_time|date:"H:i:s" }}</td> -->
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="7"> <b>No bookings for day.</b></td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+</div>
+{% endblock content %}

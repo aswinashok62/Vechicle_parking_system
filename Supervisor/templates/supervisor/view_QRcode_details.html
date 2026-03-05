@@ -1,0 +1,65 @@
+{% extends 'supervisor/shared/base.html' %}
+
+{% load static %}
+{% block name %}
+{{uname}}
+{% endblock name %}
+
+{% block content %}
+<h1>Mark Parking</h1>
+<br>
+<br>
+<br>
+<!-- <table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Slot Number</th>
+            <th>Booked By</th>
+            <th>Vehicle Type</th>
+            <th>Booked At</th>
+            <th>Start At</th>
+            <th>End At</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if bookings %}
+        {% for booking in bookings %}
+        <tr>
+            <td>{{ booking.parking_slot__slot_number }}</td>
+            <td>{{ booking.user__username }}</td>
+            <td>{{ booking.parking_slot__vehicle_type }}</td>
+            <td>{{ booking.created_at }}</td>
+            <td>{{ booking.start_time }}</td>
+            <td>{{ booking.end_time }}</td>
+            <td>{{ booking.status }}</td>
+            <td>
+                {% if booking.status == 'reserved' %}
+                <a href="{% url 'Occupied' booking.id %}" class="btn btn-warning btn-sm">Mark as Occupied</a>
+                {% elif booking.status == 'Occupied' %}
+                <a href="{% url 'Payment' booking.id %}" class="btn btn-success btn-sm">Payment</a>
+                {% else %}
+                <a class="btn btn-info btn-sm">Completed</a>
+                {% endif %}
+            </td>
+
+
+            
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="4">No bookings for today.</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table> -->
+
+
+<pre>{{ data }}</pre>
+
+
+<a href="{% url 'Occupied' id %}" class="btn btn-warning btn-sm">Mark as Occupied</a>
+
+</div>
+{% endblock content %}

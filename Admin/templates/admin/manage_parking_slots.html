@@ -1,0 +1,40 @@
+{% extends 'mall/shared/base.html' %}
+
+{% load static %}
+{% block name %}
+{{uname}}
+                    {% endblock name %}
+
+{% block content %}
+<div class="col-md-8 block-9 mb-md-5">
+    <h2 style="color: #01d28e;" class="mb-4">Manage Parking Slots</h2>
+
+    <!-- Display form -->
+    <form method="POST" style="color: black;">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.slot_number.label_tag }}
+            {{ form.slot_number }}
+        </div>
+        <div class="mb-3">
+            {{ form.vehicle_type.label_tag }}
+            {{ form.vehicle_type }}
+        </div>
+        <div class="mb-3">
+            {{ form.location.label_tag }}
+            {{ form.location }}
+        </div>
+        <div class="mb-3 form-check">
+            {{ form.is_reserved }}
+            {{ form.is_reserved.label_tag }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Parking Slot</button>
+    </form>
+
+</div>
+
+<!-- Optional: Display existing parking slots (if needed) -->
+
+
+{% endblock content %}

@@ -1,0 +1,33 @@
+{% extends 'mall/shared/base.html' %}
+
+{% load static %}
+{% block name %}
+{{uname}}
+                    {% endblock name %}
+
+{% block content %}
+<div class="col-md-8 block-9 mb-md-5">
+        <h2 style="color: #01d28e;" class="mb-4">Set Parking Rates</h2>
+
+        <!-- Display form -->
+        <form method="POST" style="color: black;">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.vehicle_type.label_tag }}
+                {{ form.vehicle_type }}
+            </div>
+            <div class="mb-3">
+                {{ form.rate_per_hour.label_tag }}
+                {{ form.rate_per_hour }}
+            </div>
+            <div class="mb-3">
+                {{ form.rate_per_day.label_tag }}
+                {{ form.rate_per_day }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Rate</button>
+        </form>
+
+     
+    </div>
+{% endblock content %}

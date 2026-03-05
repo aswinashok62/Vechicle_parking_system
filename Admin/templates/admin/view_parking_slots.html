@@ -1,0 +1,46 @@
+{% extends 'mall/shared/base.html' %}
+
+{% load static %}
+{% block name %}
+{{uname}}
+                    {% endblock name %}
+
+{% block content %}
+
+
+<div class="col-md-8 block-9 mb-md-5">
+    <h2 class="mb-4" style="color: #01d28e;">View Parking Slots</h3>
+     {% if not parking_slots %}
+        <p class="text-center text-info"> <b>No Parking Slots To Display</b> </p>
+        {% else %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Slot Number</th>
+                    <th>Vehicle Type</th>
+                    <th>Location</th>
+                    <th>Reserved</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for slot in parking_slots %}
+                <tr>
+                    <td>{{ slot.slot_number }}</td>
+                    <td>{{ slot.vehicle_type }}</td>
+                    <td>{{ slot.location }}</td>
+                    <td>{{ slot.is_reserved }}</td>
+                    <td>
+                        <a href="{% url 'edit_parking_slot' slot.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                    </td>
+                    <td>
+                        <a href="{% url 'delete_parking_slot' slot.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+ {% endif %}
+</div>
+{% endblock content %}

@@ -1,0 +1,58 @@
+{% extends 'user/shared/base.html' %}
+
+{% load static %}
+{% block name %}
+{{uname}}
+{% endblock name %}
+
+{% block content %}
+<h1 style="color: #01d28e;">My Upcoming Booked Slots </h1>
+<br>
+<br>
+<br>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Slot Number</th>
+            <th>Booked In</th>
+            <th>Vehicle Type</th>
+            <th>Booked At</th>
+            <th>Start At</th>
+            <th>End At</th>
+            <th>Status</th>
+            <th>QR Code</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if bookings %}
+        {% for booking in bookings %}
+        <tr>
+            <td>{{ booking.parking_slot__slot_number }}</td>
+            <td>{{ booking.parking_slot__mall__username}}</td>
+            <td>{{ booking.parking_slot__vehicle_type }}</td>
+            <td>{{ booking.created_at }}</td>
+            <td>{{ booking.start_time }}</td>
+            <td>{{ booking.end_time }}</td>
+            <td>{{ booking.status }}</td>
+            <td> <a href="/media/{{ booking.qr_code }}" target="_blank" rel="noopener noreferrer">
+            <img style="width: 500px;
+    height: 200px;" class="img-fluid img-thumbnail" src="/media/{{ booking.qr_code }}" alt="error"></a></td>
+
+
+            <td>
+                {% if booking.status == 'reserved' %}
+                <a href="{% url 'Cancel_Booking' booking.id %}" class="btn btn-warning btn-sm">Cancel Booking</a>
+                {% endif %}
+            </td>
+            <!-- <td>{{ booking.end_time|date:"H:i:s" }}</td> -->
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="8">No Upcoming bookings .</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+</div>
+{% endblock content %}

@@ -1,0 +1,85 @@
+{% extends 'mall/shared/base.html' %}
+
+{% load static %}
+
+{% block name %}
+{{uname}}
+                    {% endblock name %}
+{% block content %}
+
+<div class="col-md-8 block-9 mb-md-5">
+        <h2 style="color: #01d28e;" class="mb-4" >Add Supervisor</h2>
+
+        <form method="POST" style="color: black;">
+            {% csrf_token %}
+              <div class="mb-3">
+               <label for="">Name</label>
+                <!-- {{ form.email }} -->
+                
+                    <input type="text" class="form-control" name="name" style="color: white;" >
+                 
+            </div>
+            <div class="mb-3">
+                {{ form.username.label_tag }}
+                {{ form.username }}
+            </div>
+            <div class="mb-3">
+                {{ form.email.label_tag }}
+                <!-- {{ form.email }} -->
+                
+                    <input type="email" class="form-control" name="email" style="color: white;">
+                 
+            </div>
+            <div class="mb-3">
+                {{ form.password1.label_tag }}
+                <!-- {{ form.password1 }} -->
+                <input type="password" class="form-control" name="password1" style="color: white;" >
+
+            </div>
+            <div class="mb-3">
+                {{ form.password2.label_tag }}
+                <!-- {{ form.password2 }} -->
+                <input type="password" class="form-control" name="password2" style="color: white;">
+
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add</button>
+        </form>
+
+        
+    </div>
+
+    <hr>
+
+
+    <div class="col-md-8 block-9 mb-md-5">     
+
+        <!-- Optional: Display current rates (if needed) -->
+        <h2 style="color: #01d28e;" class="mt-5">Staff Details</h3>
+         {% if not data %}
+        <p class="text-center text-info"> <b>No Data To Display</b> </p>
+        {% else %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in data %}
+                <tr>
+                    <td>{{ i.staff.first_name }}</td>
+                    <td>{{ i.staff.username }}</td>
+                    <td>{{ i.staff.email }}</td>
+                   
+                   
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+         {% endif %}
+    </div>
+{% endblock content %}

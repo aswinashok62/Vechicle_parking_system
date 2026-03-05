@@ -1,0 +1,36 @@
+{% extends 'admin/shared/base.html' %}
+
+{% load static %}
+
+
+{% block content %}
+<div class="col-md-8 block-9 mb-md-5">
+    <h2 style="color: #01d28e;"> User's List</h1>
+
+        {% if not users %}
+        <p class="text-center text-info"> <b>No Users </b> </p>
+        {% else %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                   
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+               
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </table>
+
+        {% endif %}
+</div>
+{% endblock content %}

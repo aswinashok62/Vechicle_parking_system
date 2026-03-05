@@ -1,0 +1,40 @@
+{% extends 'admin/shared/base.html' %}
+
+{% load static %}
+
+
+{% block content %}
+<div class="col-md-8 block-9 mb-md-5">
+    <h2 style="color: #01d28e;">View Malls </h1>
+
+        {% if not users %}
+        <p class="text-center text-info"> <b>No Malls For Display</b> </p>
+        {% else %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Mall Name</th>
+                    <th>Location </th>
+                    <th>Username</th>
+                    <th>Email</th>
+                   
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.mall.first_name }}</td>
+                    <td>{{ user.loc_id.location }}</td>
+                    <td>{{ user.mall.username }}</td>
+                    <td>{{ user.mall.email }}</td>
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </table>
+
+        {% endif %}
+</div>
+{% endblock content %}

@@ -1,0 +1,511 @@
+{% extends 'user/shared/base.html' %}
+{% block name %}
+{{uname}}
+                    {% endblock name %}
+{% load static %}
+{% block styles %}
+<style>
+    .container {
+        max-width: 1200px;
+        /* You can adjust this as needed */
+        margin: 0 auto;
+        /* Center the container */
+    }
+
+    .slot-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        /* 4 slots per row */
+        gap: 15px;
+        /* Gap between slots */
+        margin-top: 20px;
+
+    }
+
+    .slot {
+        padding: 20px;
+        text-align: center;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+
+    .free-slot {
+       
+        border: 20px solid green;
+        /* Green for available slots */
+    }
+
+    .occupied-slot {
+        
+        border: 20px solid #f44336;
+        /* Red for occupied slots */
+    }
+
+    .reserved-slot {
+        background-color: #FFA500;
+        /* Orange for reserved slots */
+    }
+
+    .slot-number {
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .vehicle-type {
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    .mb-2{
+        margin-bottom:0px;
+    }
+</style>
+
+{% endblock %}
+
+
+
+{% block content %}
+<div class="container">
+    <h1 style="color: #01d28e;">Available Parking Slots by Mall</h1>
+
+    <form action="" method="post" style="color: black;">
+
+        <div class="row">
+            <div class="col-lg-6">
+                <Label>Choose Start Time</Label>
+                <input type="datetime-local" class="form-control" name="start_time" id="start_time">
+            </div>
+            <div class="col-lg-6">
+                <Label>Choose Stop Time</Label>
+                <input class="form-control" type="datetime-local" onchange="checkfundiff()" name="end_time" id="end_time">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <Label>Choose Location</Label>
+            <select style="color: white;" name="loc" id="location" class="form-control">
+                <option value="Select">Select Location</option>
+                {% for i in loc %}
+                <option value="{{i.id}}">{{ i.location }}</option>
+                {% endfor%}
+
+            </select>
+        </div>
+        <div class="mb-3">
+
+            <label for="mall">Select Mall:</label>
+            <select style="color: white;" name="mall" id="mall" class="form-control">
+                <option value="">Select a mall</option>
+            </select>
+        </div>
+
+        <div id="slots">
+            {% if malls %}
+            {% for mall in malls %}
+            <div class="mall">
+                <h2>{{ mall.mall.username }} - {{ mall.loc_id.location }}</h2>
+                <h3>Available Parking Slots:</h3>
+                <ul class="slot-list">
+                    {% for slot in mall.free_slots %}
+                    <li id="{{ slot.id }} ">
+                        <strong>Slot Number:</strong> {{ slot.slot_number }} <br>
+                        <strong>Vehicle Type:</strong> {{ slot.vehicle_type }}
+                    </li>
+                    {% empty %}
+                    <p>No free slots available.</p>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+            {% else %}
+            <!-- <p>No malls found for the selected location.</p> -->
+            {% endif %}
+
+        </div>
+
+        <div class="row" id="slot-grid"></div>
+    </form>
+</div>
+
+
+
+<script>
+
+    // JavaScript code to handle the view mall based on locations
+
+
+    document.getElementById('location').addEventListener('change', function () {
+        const locationId = this.value;
+        if (locationId) {
+            // Make AJAX request to fetch malls based on location
+            fetch(`/user/get-malls/?location_id=` + locationId)
+                .then(response => response.json())
+                .then(data => {
+                    const mallSelect = document.getElementById('mall');
+                    mallSelect.innerHTML = '<option value="">Select a mall</option>';
+
+                    // Populate the mall dropdown with options
+                    data.malls.forEach(mall => {
+                        const option = document.createElement('option');
+                        option.value = mall.id;
+                        option.textContent = mall.name;
+                        mallSelect.appendChild(option);
+                    });
+                });
+        }
+    });
+
+
+    // JavaScript code to view slotes based on selected mall
+    document.getElementById('mall').addEventListener('change', function () {
+        const mallId = this.value;
+
+        const startDate = document.getElementById('start_time').value; // Get the start date from the input field
+        const endDate = document.getElementById('end_time').value; 
+
+
+        if (mallId) {
+
+            const queryParams = new URLSearchParams({
+            mall_id: mallId,
+            start_date: startDate,
+            end_date: endDate,
+    });
+
+
+            // Make AJAX request to fetch free parking slots based on mall
+            //fetch(`/user/get-slots/?mall_id=` + mallId)
+            fetch(`/user/get-slots/?` +  queryParams.toString())
+                .then(response => response.json())
+                .then(data => {
+                    console.log("]]]]]]]]]]]]]]]]]]]");
+                    console.log(data);
+                    // Set mall name
+                    //  document.getElementById('mall').innerText = `Parking Slots for ${data.mall_name}`;
+
+                    // Clear the existing grid content
+                    const slotGrid = document.getElementById('slot-grid');
+                    slotGrid.innerHTML = '';
+
+                    // Loop through each slot and create card elements
+                    data.slots.forEach(slot => {
+                        // Determine the slot status
+                        let statusText;
+                        let borderColor;
+
+                        switch (slot.is_occupied) {
+                            case 0:
+                                statusText = "Free";
+                                borderColor = "green";
+                                break;
+                            case 1:
+                                statusText = "Booked";
+                                borderColor = "red";
+                                break;
+                            case 2:
+                                statusText = "Allotted";
+                                borderColor = "orange";
+                                break;
+                            case 3:
+                                statusText = "Paid";
+                                borderColor = "blue";
+                                break;
+                            default:
+                                statusText = "Unknown";
+                                borderColor = "gray";
+                        }
+
+                        // Create slot card HTML
+                        //const backgroundImage = slot.vehicle_type === 'Car' ? '{% static "\assets\images\carimg.png" %}' : '{% static "\assets\images\bikeimg.png" %}';
+                        let backgroundImage = '';
+                        if (slot.vehicle_type === 'Car' && slot.is_occupied_indate) {
+                            backgroundImage = '{% static "\assets\images\Red_Car.png" %}';
+                        } else if (slot.vehicle_type === 'Car' && !slot.is_occupied_indate && !slot.is_reserved) {
+                            backgroundImage = '{% static "\assets\images\Green_car.png" %}';
+                        } else if (slot.vehicle_type === 'Car' && !slot.is_occupied_indate && slot.is_reserved) {
+                            backgroundImage = '{% static "\assets\images\Blue_Car.png" %}';
+                        } else if (slot.vehicle_type === 'Bike' && slot.is_occupied_indate) {
+                            backgroundImage = '{% static "\assets\images\Red_Bike.png" %}';
+                        } else if (slot.vehicle_type === 'Bike' && !slot.is_occupied_indate && !slot.is_reserved) {
+                            backgroundImage = '{% static "\assets\images\Green_bike.png" %}';
+                        } else if (slot.vehicle_type === 'Bike' && !slot.is_occupied_indate && slot.is_reserved) {
+                            backgroundImage = '{% static "\assets\images\Blue_Bike.png" %}';
+                        }
+                       //  
+    //                     const slotCard = `
+    //                         <div class="col-md-3 mb-3">
+    //                             <div class="card text-center" onclick='bookSlot(${slot.id})' style="position: relative; color: white; overflow: hidden; border: 0px solid ${borderColor};" >
+    //                                  <div  style="background-image: url('${backgroundImage}'); background-color:white;     background-size: 111px;
+    // background-repeat: no-repeat; background-position: center; position: absolute; top: 0; left: 0; right: 0; bottom: 0; filter: brightness(0.6);"></div>
+    //                                 <div class="card-footer" style="position: relative; z-index: 1; >
+    //                                     <h5 class="card-title">Slot ${slot.slot_number}</h5>
+    //                                     <p class="card-text">Vehicle Type: ${slot.vehicle_type}</p>
+                      
+    //                                 </div>
+    //                             </div>
+    //                         </div>
+    //                     `; 
+
+
+    //                                      <div  style="background-image: url('${backgroundImage}'); background-color:white;     background-size: 111px;
+    // background-repeat: no-repeat; background-position: center; position: absolute; top: 0; left: 0; right: 0; bottom: 0; filter: brightness(0.6);"></div>
+//border: 0px solid ${borderColor};
+                                            const slotCard = `
+                            <div class="col-md-1 " style=" background-size: cover;  padding:0px; padding-bottom: 77px;">
+                                    <img src='{% static "assets/images/road_v02.jpg" %}'  style="display: flex; position: absolute; width:100px;">
+                                <div class="card text-center bg-transparent" onclick='bookSlot(${slot.id})' style="position: relative; color: white; overflow: hidden; border-radius:0px; border:0px;  " >
+    
+                                    <div class="card-body" style="position: relative; z-index: 1; padding: 0px 0px 5px;" >
+                                        <p class="card-title"style="margin: 0px; font-size: 12px;">Slot : ${slot.slot_number} </p>
+                                        <p class="card-title" style="margin: 0px; font-size: 12px;"> Piller : ${slot.location}</p>
+                                       
+                      
+                                    </div>
+                                      <img class="card-img-bottom" src="${backgroundImage}" style="margin-top: 20px;margin-left: 15px; width:75%;" alt="Card image cap">
+                                </div>
+                            </div>
+                        `   ;
+
+// <p class="card-text">Vehicle Type: ${slot.vehicle_type}</p>
+
+                        //   <p class="card-text">Location: ${slot.location}</p>
+                        // <p class="card-text">Status: ${statusText}</p>
+                        // <p class="card-text">${slot.is_reserved ? 'Reserved' : 'Not Reserved'}</p>
+                        // Append the slot card to the grid
+                        slotGrid.insertAdjacentHTML('beforeend', slotCard);
+                    });
+                })
+                .catch(error => console.error('Error loading parking slots:', error));
+        }
+    });
+
+
+    // JavaScript code to handle the click on a free slot
+
+    /*
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.free-slot').forEach(slot => {
+                slot.addEventListener('click', function () {
+                    console.log("hiiiiiiiiiiiiiiiiiiii")
+                    const slotId = this.dataset.slotId;
+                    const startTimeInput = document.getElementById('start_time').value;
+                    const stoptTimeInput = document.getElementById('stop_time').value;
+                    // Example booking data (you can customize this as needed)
+                    const bookingData = {
+                        slot_id: slotId,
+                        start_time: new Date(startTimeInput).toISOString(), // Current time as start time
+                        end_time: new Date(stoptTimeInput).toISOString() // 1 hour later as end time
+                    };
+        
+                    // Send the booking data to the server
+                    fetch('/user/book-slot/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify(bookingData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Slot booked successfully!');
+                            // Update the slot display (optional)
+                            this.classList.remove('free-slot');
+                            this.classList.add('occupied-slot');
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            });
+        });
+    
+        */
+
+
+
+// Function to book a slot
+function bookSlot(slotId) {
+
+    console.log("................#################...............")
+    const startTimeInput = document.getElementById('start_time').value;
+
+    const stoptTimeInput = document.getElementById('end_time').value;
+
+    if (!startTimeInput) {
+        alert("Please select a start time.");
+        return;
+    }
+
+    const startTime = new Date(startTimeInput).toISOString();
+    const endTime = new Date(stoptTimeInput).toISOString()
+    // Confirm the booking action
+    console.log(startTime,endTime);
+    if (confirm("Do you want to book this slot?")) {
+        // Send AJAX request to book the slot
+        fetch(`/user/book-slot/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(), // Ensure CSRF token is included
+            },
+            body: JSON.stringify({ slot_id: slotId,start_time:startTime ,end_time: endTime})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Slot booked successfully!");
+                // Refresh the slots to show updated status
+                document.getElementById('mall').dispatchEvent(new Event('change'));
+            } else {
+                alert("Failed to book the slot: " + data.message);
+            }
+        })
+        .catch(error => console.error('Error booking slot:', error));
+    }
+}
+
+// Function to get CSRF token from cookies (for Django)
+function getCSRFToken() {
+    console.log("...............................")
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, 10) === 'csrftoken=') {
+                cookieValue = decodeURIComponent(cookie.substring(10));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+
+
+
+    function addClickListenerToFreeSlots() {
+        document.querySelectorAll('.free-slot').forEach(slot => {
+            slot.addEventListener('click', function () {
+                const slotId = this.dataset.slotId;
+                console.log("this.dataset", this.dataset)
+                console.log(slotId);
+                const startTimeInput = document.getElementById('start_time').value;
+
+                const stoptTimeInput = document.getElementById('end_time').value;
+
+                if (!startTimeInput) {
+                    alert("Please select a start time.");
+                    return;
+                }
+
+                const startTime = new Date(startTimeInput).toISOString();
+                const endTime = new Date(stoptTimeInput).toISOString()
+
+                const bookingData = {
+                    slot_id: slotId,
+                    start_time: startTime, // Current time as start time
+                    end_time: endTime, // 1 hour later as end time
+                };
+
+                fetch('/user/book-slot/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(bookingData)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Slot booked successfully!');
+                            this.classList.remove('free-slot');
+                            this.classList.add('occupied-slot');
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+    }
+
+    // Call function once to add listeners to initially loaded elements
+    addClickListenerToFreeSlots();
+
+    // Use MutationObserver to watch for new `.free-slot` elements
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            if (mutation.type === 'childList') {
+                addClickListenerToFreeSlots();
+            }
+        });
+    });
+
+    // Start observing the container where .free-slot elements may be added
+    const slotsContainer = document.getElementById('slots');
+    observer.observe(slotsContainer, { childList: true, subtree: true });
+</script>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      let now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Adjust for timezone offset
+  
+      let formattedDateTime = now.toISOString().slice(0, 16); // Format as YYYY-MM-DDTHH:MM
+  
+      let inputField = document.getElementById("start_time");
+      inputField.min = formattedDateTime;  // Prevent past dates
+      inputField.value = formattedDateTime; // Set default value to current date & time
+  
+  
+      let inputField1 = document.getElementById("end_time");
+      inputField1.min = formattedDateTime;  // Prevent past dates
+      inputField1.value = formattedDateTime; // Set default value to current date & time
+    });
+  </script>
+  
+  
+  
+  <script>
+  
+      function checkfundiff(){
+  
+          const sdate=new Date(document.getElementById("start_time").value);
+          const edate=new Date(document.getElementById("end_time").value);
+  
+          const dif= edate.getTime()-sdate.getTime();
+          const hdiff= dif/(1000*60*60);
+          console.log(edate.getTime())
+          if (hdiff>24){
+              alert("Date difference is more than 24 Hours");
+  
+  
+  
+              let now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Adjust for timezone offset
+  
+      let formattedDateTime = now.toISOString().slice(0, 16); // Format as YYYY-MM-DDTHH:MM
+  
+      let inputField = document.getElementById("start_time");
+      inputField.min = formattedDateTime;  // Prevent past dates
+      inputField.value = formattedDateTime; // Set default value to current date & time
+  
+  
+      let inputField1 = document.getElementById("end_time");
+      inputField1.min = formattedDateTime;  // Prevent past dates
+      inputField1.value = formattedDateTime; // Set default value to current date & time
+  
+          }
+      }
+  </script>
+{% endblock content %}

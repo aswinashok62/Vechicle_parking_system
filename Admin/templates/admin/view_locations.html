@@ -1,0 +1,42 @@
+{% extends 'admin/shared/base.html' %}
+
+{% load static %}
+
+
+{% block content %}
+
+
+<div class="col-md-8 block-9 mb-md-5">
+    <h2 class="mb-4" style="color: #01d28e;">View Locations</h3>
+     {% if not loc %}
+        <p class="text-center text-info"> <b>No Locations To Display</b> </p>
+        {% else %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    
+                    
+                    <th>Location</th>
+                    
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for loc in loc %}
+                <tr>
+                    <td>{{ loc.location }}</td>
+                   
+                    <td>
+                        <a href="{% url 'edit_locations' loc.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                    </td>
+                    <td>
+                        <a href="{% url 'delete_locations' loc.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+ {% endif %}
+</div>
+{% endblock content %}

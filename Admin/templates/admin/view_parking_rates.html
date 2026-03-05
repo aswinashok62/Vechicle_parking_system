@@ -1,0 +1,44 @@
+{% extends 'mall/shared/base.html' %}
+
+{% load static %}
+
+{% block name %}
+{{uname}}
+                    {% endblock name %}
+{% block content %}
+<div class="col-md-8 block-9 mb-md-5">     
+
+        <!-- Optional: Display current rates (if needed) -->
+        <h2 style="color: #01d28e;" class="mt-5">Current Parking Rates</h3>
+         {% if not rates %}
+        <p class="text-center text-info"> <b>No Parking Rates To Display</b> </p>
+        {% else %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Vehicle Type</th>
+                    <th>Rate Per Hour</th>
+                    <th>Rate Per Day</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rate in rates %}
+                <tr>
+                    <td>{{ rate.vehicle_type }}</td>
+                    <td>{{ rate.rate_per_hour }}</td>
+                    <td>{{ rate.rate_per_day }}</td>
+                       <td>
+                        <a href="{% url 'edit_parking_rates' rate.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                    </td>
+                    <td>
+                        <a href="{% url 'delete_parking_rates' rate.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+         {% endif %}
+    </div>
+{% endblock content %}
